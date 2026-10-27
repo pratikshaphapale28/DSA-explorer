@@ -1,0 +1,6 @@
+{
+  "name": "DSA Explorer",
+  "description": "Visual, interactive algorithm learning platform for students covering graphs, trees, sorting, stacks, queues, searching, and hashing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
