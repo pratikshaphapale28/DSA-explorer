@@ -35,3 +35,28 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.4);
 }
+
+/* Calm pulse animation for active current node in graph and tree visualizers (Requirement 1 & 4) */
+@keyframes nodePulseScale {
+  0% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+.node-pulse-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nodePulseScale 600ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node-pulse-ring {
+    animation: none !important;
+    display: none !important;
+  }
+}

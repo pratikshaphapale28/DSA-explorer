@@ -174,13 +174,14 @@ export const HashingStage: React.FC<HashingStageProps> = ({ onAlgorithmChange })
     : safeSize > 0 ? safeCount / safeSize : 0;
 
   return (
-    <div className="flex-1 flex flex-col p-4 md:p-6 overflow-y-auto">
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900 border border-slate-800 mb-4 shadow-sm">
+    <div className="flex-1 min-h-0 flex flex-col p-2 md:p-3 overflow-y-auto min-[1100px]:overflow-hidden">
+      {/* Strategy and Config Toolbar: At most 2 tight rows (Requirement 2a) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 mb-2 shadow-xs shrink-0">
         {/* Strategy Selector */}
-        <div className="flex items-center gap-1 p-1 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
+        <div className="flex items-center gap-1 p-0.5 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
           <button
             onClick={() => setStrategy('linear_probing')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded-md transition-all ${
               strategy === 'linear_probing'
                 ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                 : 'text-slate-400 hover:text-slate-200'
@@ -190,7 +191,7 @@ export const HashingStage: React.FC<HashingStageProps> = ({ onAlgorithmChange })
           </button>
           <button
             onClick={() => setStrategy('quadratic_probing')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded-md transition-all ${
               strategy === 'quadratic_probing'
                 ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                 : 'text-slate-400 hover:text-slate-200'
@@ -200,37 +201,37 @@ export const HashingStage: React.FC<HashingStageProps> = ({ onAlgorithmChange })
           </button>
           <button
             onClick={() => setStrategy('chaining')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded-md transition-all ${
               strategy === 'chaining'
                 ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Chaining (Separate)
+            Chaining
           </button>
         </div>
 
         {/* Hash function & Table size controls */}
-        <div className="flex items-center gap-3 flex-wrap text-xs">
+        <div className="flex items-center gap-2 flex-wrap text-xs">
           <label className="flex items-center gap-1 text-slate-300">
-            <span>Hash Function:</span>
+            <span>Hash:</span>
             <select
               value={hashFunction}
               onChange={e => setHashFunction(e.target.value as any)}
-              className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 font-mono"
+              className="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-slate-200 font-mono"
             >
               <option value="division">Division (key mod m)</option>
-              <option value="multiplication">Multiplication (Knuth A)</option>
-              <option value="string_poly">Polynomial String Hash</option>
+              <option value="multiplication">Knuth Multiplicative</option>
+              <option value="string_poly">Polynomial String</option>
             </select>
           </label>
 
           <label className="flex items-center gap-1 text-slate-300">
-            <span>Size (m):</span>
+            <span>Size:</span>
             <select
               value={tableSize}
               onChange={e => setTableSize(parseInt(e.target.value, 10))}
-              className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 font-mono"
+              className="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-slate-200 font-mono"
             >
               <option value={5}>m = 5</option>
               <option value={7}>m = 7 (Prime)</option>
@@ -242,19 +243,19 @@ export const HashingStage: React.FC<HashingStageProps> = ({ onAlgorithmChange })
       </div>
 
       {/* Action Input Bar */}
-      <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-900 border border-slate-800 rounded-xl mb-4 text-xs">
+      <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-900 border border-slate-800 rounded-xl mb-2 text-xs shrink-0">
         <span className="text-slate-400 font-medium">Key:</span>
         <input
           type="text"
           value={keyInput}
           onChange={e => setKeyInput(e.target.value)}
-          className="w-24 px-2 py-1 bg-slate-950 border border-slate-700 rounded text-slate-100 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-20 px-2 py-0.5 bg-slate-950 border border-slate-700 rounded text-slate-100 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
           placeholder="e.g. 42"
         />
 
         <button
           onClick={handleInsert}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Insert(key)</span>
@@ -262,7 +263,7 @@ export const HashingStage: React.FC<HashingStageProps> = ({ onAlgorithmChange })
 
         <button
           onClick={handleSearch}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium transition-colors"
         >
           <Search className="w-3.5 h-3.5" />
           <span>Search(key)</span>
@@ -270,7 +271,7 @@ export const HashingStage: React.FC<HashingStageProps> = ({ onAlgorithmChange })
 
         <button
           onClick={handleDelete}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white font-semibold transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white font-semibold transition-colors"
         >
           <Trash2 className="w-3.5 h-3.5" />
           <span>Delete(key)</span>
@@ -278,16 +279,16 @@ export const HashingStage: React.FC<HashingStageProps> = ({ onAlgorithmChange })
 
         <button
           onClick={handleLoadCollisionSample}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-700/60 font-medium transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-700/60 font-medium transition-colors"
           title="Insert keys 7, 14, 21, 28 to demonstrate collisions"
         >
           <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-          <span>Demo Collisions [7, 14, 21, 28]</span>
+          <span>Demo Collisions</span>
         </button>
 
         <button
           onClick={() => resetTable(tableSize, strategy, hashFunction)}
-          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 ml-auto"
+          className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 ml-auto"
           title="Clear Table"
         >
           <RotateCcw className="w-3.5 h-3.5" />
@@ -295,10 +296,10 @@ export const HashingStage: React.FC<HashingStageProps> = ({ onAlgorithmChange })
       </div>
 
       {/* Hash Math & Rehash Alert Banner */}
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-xs shrink-0">
         <div className="flex items-center gap-2">
           <Calculator className="w-4 h-4 text-indigo-400 shrink-0" />
-          <span className="text-slate-300 font-mono">
+          <span className="text-slate-300 font-mono text-[11px]">
             {aux.formulaString || `Formula: h(k) = k mod ${tableSize}`}
           </span>
         </div>
@@ -316,17 +317,39 @@ export const HashingStage: React.FC<HashingStageProps> = ({ onAlgorithmChange })
           {safeLoadFactor >= 0.75 && (
             <button
               onClick={handleRehash}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors shadow-sm animate-pulse"
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors shadow-xs animate-pulse"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Rehash (double size to next prime)</span>
+              <RotateCcw className="w-3 h-3" />
+              <span>Rehash (double size)</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Table Slots Visualization Arena */}
-      <div className="min-h-[200px] flex flex-col justify-center p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 relative overflow-x-auto">
+      {/* Table Slots Visualization Arena: Flex-1 takes remaining flexible height (Requirement 2b) */}
+      <div className="flex-1 min-h-0 flex flex-col justify-start p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 relative overflow-x-auto">
+        {/* Visual Legend Header (Requirement 39) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] mb-2 shrink-0 z-10">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-slate-800 border border-indigo-500/50" />
+              <span className="text-slate-400">Occupied Slot</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-slate-950 border border-slate-800" />
+              <span className="text-slate-400">Empty Slot</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-amber-500" />
+              <span className="text-slate-400">Probing / Collision</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-rose-950 border border-rose-800 border-dashed" />
+              <span className="text-slate-400">DELETED (Tombstone)</span>
+            </span>
+          </div>
+        </div>
+
         {/* Probe sequence ribbon if searching/inserting */}
         {aux.probeSequence && aux.probeSequence.length > 0 && (
           <div className="mb-3 flex items-center gap-2 text-xs font-mono">

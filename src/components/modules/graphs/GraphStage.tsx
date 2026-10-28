@@ -17,7 +17,7 @@ interface GraphStageProps {
 }
 
 export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => {
-  const { currentStep, loadSteps } = usePlayer();
+  const { currentStep, currentStepIndex, loadSteps } = usePlayer();
 
   const [graph, setGraph] = useState<GraphState>({
     nodes: [
@@ -113,13 +113,21 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
   const getCanvasCoords = (clientX: number, clientY: number) => {
     const svg = svgRef.current;
     if (!svg) return { x: 0, y: 0 };
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    const ctm = svg.getScreenCTM();
+    if (ctm) {
+      const transformed = pt.matrixTransform(ctm.inverse());
+      return {
+        x: Math.round(transformed.x),
+        y: Math.round(transformed.y),
+      };
+    }
     const rect = svg.getBoundingClientRect();
-    const x = Math.round(((clientX - rect.left) / rect.width) * 700);
-    const y = Math.round(((clientY - rect.top) / rect.height) * 320);
-    return {
-      x: Math.max(30, Math.min(x, 670)),
-      y: Math.max(30, Math.min(y, 290)),
-    };
+    const x = Math.round(((clientX - rect.left) / rect.width) * 550 + 75);
+    const y = Math.round(((clientY - rect.top) / rect.height) * 285 + 25);
+    return { x, y };
   };
 
   // Add Node on Canvas Click when in 'add_node' mode
@@ -198,7 +206,7 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
       ...prev,
       nodes: prev.nodes.map(n =>
         n.id === draggingNodeId
-          ? { ...n, x: Math.max(25, Math.min(newX, 660)), y: Math.max(25, Math.min(newY, 315)) }
+          ? { ...n, x: newX, y: newY }
           : n
       ),
     }));
@@ -298,25 +306,43 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
   const highlightedEdgeIds = currentStep?.highlights?.edgeIds || [];
   const aux = (currentStep?.auxiliary as GraphAuxiliary) || {};
 
+  // Node radius increased for readability at 1366x768 (Requirement 2)
+  const nodeRadius = 26;
+
+  // Calculate dynamic bounding box of all nodes with padding to fit the canvas (Requirement 2)
+  const padding = 55;
+  const xs = graph.nodes.map(n => n.x);
+  const ys = graph.nodes.map(n => n.y);
+  const minX = xs.length > 0 ? Math.min(...xs) : 100;
+  const maxX = xs.length > 0 ? Math.max(...xs) : 600;
+  const minY = ys.length > 0 ? Math.min(...ys) : 60;
+  const maxY = ys.length > 0 ? Math.max(...ys) : 260;
+
+  const vbX = Math.floor(minX - padding);
+  const vbY = Math.floor(minY - padding);
+  const vbWidth = Math.max(300, Math.ceil(maxX - minX + padding * 2));
+  const vbHeight = Math.max(180, Math.ceil(maxY - minY + padding * 2 + 20)); // extra room for dist: labels
+  const viewBoxStr = `${vbX} ${vbY} ${vbWidth} ${vbHeight}`;
+
   return (
-    <div className="flex-1 flex flex-col p-4 md:p-6 overflow-y-auto">
-      {/* Top Configuration Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900 border border-slate-800 mb-4 shadow-sm">
+    <div className="flex-1 min-h-0 flex flex-col p-2 md:p-3 overflow-y-auto min-[1100px]:overflow-hidden">
+      {/* Top Configuration Toolbar: At most 2 tight rows (Requirement 2a) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 mb-2 shadow-xs shrink-0">
         {/* Algorithm Tabs */}
-        <div className="flex items-center gap-1 p-1 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
+        <div className="flex items-center gap-1 p-0.5 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
           <button
             onClick={() => setActiveAlgoId('dijkstra')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded-md transition-all ${
               activeAlgoId === 'dijkstra'
                 ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Dijkstra's Shortest Path
+            Dijkstra's Path
           </button>
           <button
             onClick={() => setActiveAlgoId('bfs')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded-md transition-all ${
               activeAlgoId === 'bfs'
                 ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                 : 'text-slate-400 hover:text-slate-200'
@@ -326,7 +352,7 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
           </button>
           <button
             onClick={() => setActiveAlgoId('dfs')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded-md transition-all ${
               activeAlgoId === 'dfs'
                 ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                 : 'text-slate-400 hover:text-slate-200'
@@ -343,7 +369,7 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
             <select
               value={startNodeId}
               onChange={e => setStartNodeId(e.target.value)}
-              className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 font-mono"
+              className="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-slate-200 font-mono"
             >
               {graph.nodes.map(n => (
                 <option key={n.id} value={n.id}>
@@ -359,7 +385,7 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
               <select
                 value={targetNodeId}
                 onChange={e => setTargetNodeId(e.target.value)}
-                className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 font-mono"
+                className="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-slate-200 font-mono"
               >
                 <option value="">None (All)</option>
                 {graph.nodes.map(n => (
@@ -373,7 +399,7 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
 
           <button
             onClick={handleRun}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-colors shadow-sm"
+            className="flex items-center gap-1 px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-colors shadow-xs"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
             <span>Run {activeAlgoId.toUpperCase()}</span>
@@ -382,7 +408,7 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
       </div>
 
       {/* Canvas Tooling & Graph Props Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 mb-4 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-900/60 border border-slate-800 mb-2 text-xs shrink-0">
         {/* Canvas action modes */}
         <div className="flex items-center gap-1">
           <button
@@ -564,26 +590,49 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
         </div>
       </div>
 
-      {/* Interactive Graph SVG Canvas */}
-      <div className="h-[380px] rounded-2xl bg-slate-950/70 border border-slate-800/80 relative overflow-hidden flex flex-col justify-center shrink-0 shadow-sm">
+      {/* Interactive Graph SVG Canvas: Flex-1 takes all flexible height (Requirement 2b) */}
+      <div className="flex-1 min-h-[220px] rounded-2xl bg-slate-950/70 border border-slate-800/80 relative overflow-hidden flex flex-col justify-start p-2 shadow-xs">
+        {/* Visual Legend Header (Requirement 39) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] mb-1.5 shrink-0 z-10">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-800 border border-indigo-400" />
+              <span className="text-slate-400">Node</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+              <span className="text-slate-400">Current / Active</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+              <span className="text-slate-400">Visited</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-emerald-400" />
+              <span className="text-slate-400">Shortest Path</span>
+            </span>
+          </div>
+        </div>
         <svg
           ref={svgRef}
-          viewBox="0 0 700 320"
+          viewBox={viewBoxStr}
           preserveAspectRatio="xMidYMid meet"
+          width="100%"
+          height="100%"
           onClick={handleCanvasClick}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          className="w-full flex-1 cursor-crosshair select-none"
+          className="w-full h-full cursor-crosshair select-none"
         >
           {/* Arrow markers for directed edges */}
           <defs>
             <marker
               id="arrow-default"
               viewBox="0 0 10 10"
-              refX="22"
+              refX="10"
               refY="5"
-              markerWidth="6"
-              markerHeight="6"
+              markerWidth="7"
+              markerHeight="7"
               orient="auto-start-reverse"
             >
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569" />
@@ -591,35 +640,45 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
             <marker
               id="arrow-active"
               viewBox="0 0 10 10"
-              refX="22"
+              refX="10"
               refY="5"
-              markerWidth="6"
-              markerHeight="6"
+              markerWidth="7"
+              markerHeight="7"
               orient="auto-start-reverse"
             >
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
             </marker>
           </defs>
 
-          {/* Render Edges */}
-          {graph.edges.map(edge => {
-            const fromNode = graph.nodes.find(n => n.id === edge.from);
-            const toNode = graph.nodes.find(n => n.id === edge.to);
-            if (!fromNode || !toNode) return null;
+          {/* LAYER 1: First all edges (lines), shortened so they stop at circle borders */}
+          <g className="graph-edges">
+            {graph.edges.map(edge => {
+              const fromNode = graph.nodes.find(n => n.id === edge.from);
+              const toNode = graph.nodes.find(n => n.id === edge.to);
+              if (!fromNode || !toNode) return null;
 
-            const isHighlighted = highlightedEdgeIds.includes(edge.id);
-            const isShortestPathEdge =
-              Boolean(aux.shortestPath && aux.shortestPath.length > 1 && isHighlighted && currentStep?.type === 'complete');
-            const midX = (fromNode.x + toNode.x) / 2;
-            const midY = (fromNode.y + toNode.y) / 2;
+              const isHighlighted = highlightedEdgeIds.includes(edge.id);
+              const isShortestPathEdge =
+                Boolean(aux.shortestPath && aux.shortestPath.length > 1 && isHighlighted && currentStep?.type === 'complete');
 
-            return (
-              <g key={edge.id} onClick={() => setSelectedElement({ type: 'edge', id: edge.id })}>
+              const dx = toNode.x - fromNode.x;
+              const dy = toNode.y - fromNode.y;
+              const dist = Math.hypot(dx, dy) || 1;
+              const rFrom = nodeRadius;
+              const rTo = graph.isDirected ? nodeRadius + 1 : nodeRadius;
+
+              const x1 = fromNode.x + (dx / dist) * rFrom;
+              const y1 = fromNode.y + (dy / dist) * rFrom;
+              const x2 = toNode.x - (dx / dist) * rTo;
+              const y2 = toNode.y - (dy / dist) * rTo;
+
+              return (
                 <line
-                  x1={fromNode.x}
-                  y1={fromNode.y}
-                  x2={toNode.x}
-                  y2={toNode.y}
+                  key={edge.id}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
                   stroke={isShortestPathEdge ? '#10b981' : isHighlighted ? '#38bdf8' : '#334155'}
                   strokeWidth={isShortestPathEdge ? '4.5' : isHighlighted ? '3.5' : '2'}
                   markerEnd={
@@ -631,10 +690,27 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
                   }
                   className="transition-all duration-300"
                 />
+              );
+            })}
+          </g>
 
-                {/* Inline Edge Weight Label: only show in Dijkstra mode; hide in BFS and DFS mode */}
-                {graph.isWeighted && activeAlgoId === 'dijkstra' && (
+          {/* LAYER 2: Inline Edge Weight Labels with solid background rect so lines never cross through them */}
+          {graph.isWeighted && activeAlgoId === 'dijkstra' && (
+            <g className="graph-edge-weights">
+              {graph.edges.map(edge => {
+                const fromNode = graph.nodes.find(n => n.id === edge.from);
+                const toNode = graph.nodes.find(n => n.id === edge.to);
+                if (!fromNode || !toNode) return null;
+
+                const isHighlighted = highlightedEdgeIds.includes(edge.id);
+                const isShortestPathEdge =
+                  Boolean(aux.shortestPath && aux.shortestPath.length > 1 && isHighlighted && currentStep?.type === 'complete');
+                const midX = (fromNode.x + toNode.x) / 2;
+                const midY = (fromNode.y + toNode.y) / 2;
+
+                return (
                   <g
+                    key={`weight-${edge.id}`}
                     transform={`translate(${midX}, ${midY})`}
                     className="cursor-pointer"
                     onClick={e => {
@@ -646,128 +722,164 @@ export const GraphStage: React.FC<GraphStageProps> = ({ onAlgorithmChange }) => 
                       }
                     }}
                   >
+                    {/* Small background rect so lines don't cross through label (Requirement 2) */}
                     <rect
-                      x="-12"
-                      y="-10"
-                      width="24"
-                      height="18"
-                      rx="4"
-                      fill="#0f172a"
+                      x="-16"
+                      y="-11"
+                      width="32"
+                      height="22"
+                      rx="5"
+                      fill="#020617"
                       stroke={isShortestPathEdge ? '#10b981' : isHighlighted ? '#38bdf8' : '#475569'}
-                      strokeWidth="1"
+                      strokeWidth="1.5"
                     />
                     <text
                       x="0"
-                      y="3"
+                      y="0"
                       textAnchor="middle"
-                      fill="#e2e8f0"
-                      fontSize="10"
+                      dominantBaseline="central"
+                      fill="#f1f5f9"
+                      fontSize="12"
                       fontFamily="monospace"
                       fontWeight="bold"
+                      pointerEvents="none"
                     >
                       {edge.weight}
                     </text>
                   </g>
-                )}
-              </g>
-            );
-          })}
+                );
+              })}
+            </g>
+          )}
 
-          {/* Render Nodes: Distinguish inspecting (cyan) vs settled (green) vs current active node (orange) */}
-          {graph.nodes.map(node => {
-            const isCurrentNode = aux.currentNodeId === node.id;
-            const isHighlighted = highlightedNodeIds.includes(node.id);
-            const isSettled = aux.visitedNodeIds?.includes(node.id);
-            const isShortestPathNode = Boolean(aux.shortestPath && aux.shortestPath.includes(node.id) && currentStep?.type === 'complete');
-            const isStart = node.id === startNodeId;
-            const isTarget = node.id === targetNodeId;
-            const isSelected = selectedElement?.type === 'node' && selectedElement.id === node.id;
-            const isInspecting = isHighlighted && !isSettled && !isCurrentNode;
+          {/* LAYER 3: Graph Nodes - Grouped with transform="translate(x, y)" so ring is always centered at cx=0, cy=0 (Requirement 1 & 2) */}
+          <g className="graph-nodes">
+            {graph.nodes.map(node => {
+              const isCurrentNode = aux.currentNodeId === node.id;
+              const isHighlighted = highlightedNodeIds.includes(node.id);
+              const isSettled = aux.visitedNodeIds?.includes(node.id);
+              const isShortestPathNode = Boolean(aux.shortestPath && aux.shortestPath.includes(node.id) && currentStep?.type === 'complete');
+              const isStart = node.id === startNodeId;
+              const isTarget = node.id === targetNodeId;
+              const isSelected = selectedElement?.type === 'node' && selectedElement.id === node.id;
+              const isInspecting = isHighlighted && !isSettled && !isCurrentNode;
+              const dist = aux.distanceTable ? aux.distanceTable[node.id] : undefined;
 
-            let fill = '#1e293b';
-            let stroke = '#6366f1';
+              let fill = '#1e293b';
+              let stroke = '#6366f1';
 
-            if (isShortestPathNode) {
-              fill = '#059669';
-              stroke = '#34d399';
-            } else if (isCurrentNode) {
-              // Current active node gets distinct orange stroke and amber fill
-              fill = '#78350f';
-              stroke = '#f59e0b';
-            } else if (isInspecting) {
-              fill = '#0284c7';
-              stroke = '#38bdf8';
-            } else if (isSettled) {
-              // Green ONLY after node is permanently settled/visited!
-              fill = '#059669';
-              stroke = '#10b981';
-            } else if (isHighlighted) {
-              fill = '#0284c7';
-              stroke = '#38bdf8';
-            } else if (isStart && aux.isUnrun) {
-              stroke = '#f59e0b';
-            } else if (isTarget) {
-              stroke = '#ec4899';
-            }
+              if (isShortestPathNode) {
+                fill = '#059669';
+                stroke = '#34d399';
+              } else if (isCurrentNode) {
+                fill = '#78350f';
+                stroke = '#f59e0b';
+              } else if (isInspecting) {
+                fill = '#0284c7';
+                stroke = '#38bdf8';
+              } else if (isSettled) {
+                fill = '#059669';
+                stroke = '#10b981';
+              } else if (isHighlighted) {
+                fill = '#0284c7';
+                stroke = '#38bdf8';
+              } else if (isStart && aux.isUnrun) {
+                stroke = '#f59e0b';
+              } else if (isTarget) {
+                stroke = '#ec4899';
+              }
 
-            return (
-              <g
-                key={node.id}
-                onMouseDown={e => handleNodeMouseDown(e, node)}
-                onClick={e => handleNodeClick(e, node.id)}
-                className="cursor-grab active:cursor-grabbing transition-transform"
-              >
-                {/* Rule 21: Orange "current node" ring only rendered for the active node; clears when node changes */}
-                {isCurrentNode && (
-                  <circle
-                    cx={node.x}
-                    cy={node.y}
-                    r="26"
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth="3"
-                    strokeDasharray="4 2"
-                    className="animate-spin"
-                  />
-                )}
-                <circle
-                  cx={node.x}
-                  cy={node.y}
-                  r="20"
-                  fill={fill}
-                  stroke={stroke}
-                  strokeWidth={isShortestPathNode ? '4' : isCurrentNode ? '3.5' : isSelected ? '3.5' : '2.5'}
-                  className="filter drop-shadow-md transition-all duration-200"
-                />
-                <text
-                  x={node.x}
-                  y={node.y + 4}
-                  textAnchor="middle"
-                  fill="#ffffff"
-                  fontSize="12"
-                  fontFamily="monospace"
-                  fontWeight="bold"
+              return (
+                <g
+                  key={`node-${node.id}`}
+                  transform={`translate(${node.x}, ${node.y})`}
+                  className="select-none"
                 >
-                  {node.label}
-                </text>
+                  {/* Current Node Highlight Rings: Exactly centered at cx=0, cy=0 (Requirement 1 & 4) */}
+                  {isCurrentNode && (
+                    <>
+                      {/* Thin static ring that stays around the current node until next step */}
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r={nodeRadius + 6}
+                        fill="none"
+                        stroke="#f59e0b"
+                        strokeWidth="2"
+                        className="opacity-90"
+                      />
+                      {/* Solid pulse ring: scales 1.0 to 1.25 and fades out over 600ms */}
+                      <circle
+                        key={`pulse-${node.id}-${currentStepIndex}`}
+                        cx="0"
+                        cy="0"
+                        r={nodeRadius + 6}
+                        fill="none"
+                        stroke="#f59e0b"
+                        strokeWidth="2.5"
+                        className="node-pulse-ring"
+                      />
+                    </>
+                  )}
 
-                {/* Tentative distance label for Dijkstra */}
-                {activeAlgoId === 'dijkstra' && aux.distanceTable && (
+                  {/* Solid Node Circle */}
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r={nodeRadius}
+                    fill={fill}
+                    stroke={stroke}
+                    strokeWidth={isShortestPathNode ? '4' : isCurrentNode ? '3.5' : isSelected ? '3.5' : '2.5'}
+                    className="filter drop-shadow-md transition-all duration-200"
+                  />
+
+                  {/* Node Label: bold, white, centered, readable font size (Requirement 2) */}
                   <text
-                    x={node.x}
-                    y={node.y + 32}
+                    x="0"
+                    y="0"
                     textAnchor="middle"
-                    fill={isShortestPathNode ? '#34d399' : '#38bdf8'}
-                    fontSize="10"
+                    dominantBaseline="central"
+                    fill="#ffffff"
+                    fontSize="15"
                     fontFamily="monospace"
                     fontWeight="bold"
+                    pointerEvents="none"
+                    className="select-none"
                   >
-                    dist: {aux.distanceTable[node.id] === Infinity ? '∞' : aux.distanceTable[node.id]}
+                    {node.label}
                   </text>
-                )}
-              </g>
-            );
-          })}
+
+                  {/* Dijkstra Tentative Distance label (Requirement 2) */}
+                  {activeAlgoId === 'dijkstra' && dist !== undefined && (
+                    <text
+                      x="0"
+                      y={nodeRadius + 18}
+                      textAnchor="middle"
+                      fill={isShortestPathNode ? '#34d399' : '#38bdf8'}
+                      fontSize="12"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                      pointerEvents="none"
+                      className="select-none"
+                    >
+                      dist: {dist === Infinity ? '∞' : dist}
+                    </text>
+                  )}
+
+                  {/* Transparent interactive hitbox for smooth node dragging and selection */}
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r={nodeRadius + 4}
+                    fill="transparent"
+                    onMouseDown={e => handleNodeMouseDown(e, node)}
+                    onClick={e => handleNodeClick(e, node.id)}
+                    className="cursor-grab active:cursor-grabbing"
+                  />
+                </g>
+              );
+            })}
+          </g>
         </svg>
       </div>
     </div>

@@ -253,13 +253,13 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
 
   return (
     <ErrorBoundary fallbackTitle="Stack & Queue Visualizer Error">
-      <div className="flex-1 flex flex-col p-4 md:p-6 overflow-y-auto">
-        {/* Module Navigation Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900 border border-slate-800 mb-4 shadow-sm shrink-0">
-          <div className="flex items-center gap-1 p-1 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
+      <div className="flex-1 min-h-0 flex flex-col p-2 md:p-3 overflow-y-auto min-[1100px]:overflow-hidden">
+        {/* Module Navigation Tabs: At most 2 tight rows (Requirement 2a) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 mb-2 shadow-xs shrink-0">
+          <div className="flex items-center gap-1 p-0.5 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
             <button
               onClick={() => handleTabChange('stack')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all ${
                 tab === 'stack'
                   ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
@@ -270,7 +270,7 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
             </button>
             <button
               onClick={() => handleTabChange('queue')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all ${
                 tab === 'queue'
                   ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
@@ -281,25 +281,25 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
             </button>
             <button
               onClick={() => handleTabChange('circular')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all ${
                 tab === 'circular'
                   ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <CircleDot className="w-3.5 h-3.5" />
-              <span>Circular Queue (Ring)</span>
+              <span>Circular Queue</span>
             </button>
             <button
               onClick={() => handleTabChange('parentheses')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all ${
                 tab === 'parentheses'
                   ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Bracket Validator Demo</span>
+              <span>Bracket Validator</span>
             </button>
           </div>
 
@@ -313,7 +313,7 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
                 max={8}
                 value={capacity}
                 onChange={e => setCapacity(parseInt(e.target.value, 10))}
-                className="w-20 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                className="w-16 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
               />
               <span className="font-mono font-bold text-indigo-400">{capacity}</span>
             </label>
@@ -322,7 +322,7 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
 
         {/* Overflow / Underflow Toast Banner */}
         {currentStateMsg && (
-          <div className="mb-4 flex items-center gap-2 p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-300 text-xs font-semibold animate-in fade-in shrink-0">
+          <div className="mb-2 flex items-center gap-2 p-2 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-300 text-xs font-semibold animate-in fade-in shrink-0">
             <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
             <span>{currentStateMsg}: Operation blocked by boundary conditions!</span>
           </div>
@@ -330,13 +330,13 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
 
         {/* Action Controls for Stack & Queue */}
         {tab !== 'parentheses' && (
-          <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-900 border border-slate-800 rounded-xl mb-4 text-xs shrink-0">
+          <div className="flex flex-wrap items-center gap-2 p-2 bg-slate-900 border border-slate-800 rounded-xl mb-2 text-xs shrink-0">
             <span className="text-slate-400 font-medium">Value:</span>
             <input
               type="text"
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
-              className="w-20 px-2 py-1 bg-slate-950 border border-slate-700 rounded text-slate-100 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-16 px-2 py-0.5 bg-slate-950 border border-slate-700 rounded text-slate-100 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
               placeholder="Val"
             />
 
@@ -405,9 +405,31 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
           </div>
         )}
 
+        {/* Visual Legend Header (Requirement 39) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] mb-3 px-1 shrink-0 z-10">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-indigo-600" />
+              <span className="text-slate-400">Filled Item</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-slate-900 border border-slate-700 opacity-60" />
+              <span className="text-slate-400">Empty Slot</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-amber-400" />
+              <span className="text-slate-400">Top / Front / Rear</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500" />
+              <span className="text-slate-400">Match / Valid</span>
+            </span>
+          </div>
+        </div>
+
         {/* 1. Arena Display: STACK (Anchored to top, all 6 capacity slots clearly drawn, empty slots faded, TOP marked) */}
         {tab === 'stack' && (
-          <div className="flex-1 min-h-[360px] flex flex-col items-center justify-start pt-3 pb-6 px-6 rounded-2xl bg-slate-950/70 border border-slate-800 relative">
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-start p-3 rounded-2xl bg-slate-950/70 border border-slate-800 relative overflow-y-auto">
             <div className="w-full max-w-sm flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
               <span className="font-semibold text-slate-300">Stack Container (Top-Anchored)</span>
               <span>
@@ -460,8 +482,8 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
 
         {/* 2. Arena Display: QUEUE (Top-aligned, clear Front and Rear markers) */}
         {tab === 'queue' && (
-          <div className="flex-1 min-h-[340px] flex flex-col items-center justify-start pt-4 pb-6 px-6 rounded-2xl bg-slate-950/70 border border-slate-800 relative">
-            <div className="w-full max-w-xl flex items-center justify-between text-xs font-mono text-slate-400 mb-4">
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-start p-3 rounded-2xl bg-slate-950/70 border border-slate-800 relative overflow-y-auto">
+            <div className="w-full max-w-xl flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
               <span className="font-semibold text-slate-300">Linear Queue (FIFO: First-In First-Out)</span>
               <span>
                 Length: <strong className="text-emerald-400">{queueItems.length}</strong> / {capacity}
@@ -519,13 +541,13 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
 
         {/* 3. Arena Display: CIRCULAR QUEUE (Top-aligned, wrap-around modulo verification) */}
         {tab === 'circular' && (
-          <div className="flex-1 min-h-[340px] flex flex-col items-center justify-start pt-4 pb-6 px-6 rounded-2xl bg-slate-950/70 border border-slate-800 relative">
-            <div className="w-full max-w-md flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-start p-3 rounded-2xl bg-slate-950/70 border border-slate-800 relative overflow-y-auto">
+            <div className="w-full max-w-md flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
               <span className="font-semibold text-slate-300">Circular Queue (Ring Buffer)</span>
               <span className="text-indigo-400 font-bold">rear = (rear + 1) % capacity</span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 max-w-md w-full p-4 bg-slate-900/60 rounded-2xl border border-slate-800">
+            <div className="grid grid-cols-3 gap-2.5 max-w-md w-full p-3 bg-slate-900/60 rounded-2xl border border-slate-800">
               {circularState.buffer.map((val, idx) => {
                 const isFront = circularState.front === idx;
                 const isRear = circularState.rear === idx;
@@ -533,7 +555,7 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
                 return (
                   <div
                     key={idx}
-                    className={`h-22 rounded-xl p-2.5 flex flex-col items-center justify-between border transition-all ${
+                    className={`h-20 rounded-xl p-2 flex flex-col items-center justify-between border transition-all ${
                       val !== null
                         ? 'bg-slate-800/90 border-indigo-500/50 shadow-md ring-1 ring-indigo-500/20'
                         : 'bg-slate-950/40 border-slate-800 text-slate-600'
@@ -565,7 +587,7 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
               })}
             </div>
 
-            <div className="mt-4 text-xs font-mono text-slate-300 flex items-center justify-around w-full max-w-md bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+            <div className="mt-3 text-xs font-mono text-slate-300 flex items-center justify-around w-full max-w-md bg-slate-900/80 p-2 rounded-xl border border-slate-800">
               <span>Front Index: <strong className="text-emerald-400">{circularState.front}</strong></span>
               <span>Rear Index: <strong className="text-amber-400">{circularState.rear}</strong></span>
               <span>Count: <strong className="text-indigo-400">{circularState.count}</strong> / {circularState.capacity}</span>
@@ -573,9 +595,9 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
           </div>
         )}
 
-        {/* 4. Arena Display: BRACKET VALIDATOR DEMO (Fixed crash, custom text input, step through, valid/invalid conclusion) */}
+        {/* 4. Arena Display: BRACKET VALIDATOR DEMO */}
         {tab === 'parentheses' && (
-          <div className="flex-1 min-h-[340px] flex flex-col items-center justify-start pt-3 pb-6 px-4 md:px-6 rounded-2xl bg-slate-950/70 border border-slate-800 relative">
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-start p-3 rounded-2xl bg-slate-950/70 border border-slate-800 relative overflow-y-auto">
             {/* Custom Input & Validation Bar */}
             <div className="w-full max-w-2xl flex flex-col sm:flex-row items-center gap-2 p-3 bg-slate-900 border border-slate-800 rounded-xl mb-4">
               <span className="text-xs font-medium text-slate-300 whitespace-nowrap">Bracket String:</span>
@@ -665,13 +687,13 @@ export const StackQueueStage: React.FC<StackQueueStageProps> = ({ onAlgorithmCha
 
               {/* Status Outcome Badge */}
               <div className="flex items-center gap-2">
-                {currentStep?.auxiliary && (currentStep.auxiliary as any).isBalanced === true && (
+                {Boolean(currentStep?.auxiliary && (currentStep.auxiliary as any).isBalanced === true) && (
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-xs font-bold shadow-sm">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     <span>VALID (Properly Balanced)</span>
                   </div>
                 )}
-                {currentStep?.auxiliary && (currentStep.auxiliary as any).isBalanced === false && (
+                {Boolean(currentStep?.auxiliary && (currentStep.auxiliary as any).isBalanced === false) && (
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-950/80 border border-rose-800 text-rose-300 text-xs font-bold shadow-sm">
                     <XCircle className="w-4 h-4 text-rose-400" />
                     <span>INVALID (Mismatched or Unclosed)</span>

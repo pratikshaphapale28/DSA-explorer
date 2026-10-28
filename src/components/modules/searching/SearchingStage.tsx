@@ -91,14 +91,14 @@ export const SearchingStage: React.FC<SearchingStageProps> = ({
   const maxVal = Math.max(...stepState, target, 50);
 
   return (
-    <div className="flex-1 flex flex-col p-4 md:p-6 overflow-y-auto">
-      {/* Stage Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900 border border-slate-800 mb-6 shadow-sm">
+    <div className="flex-1 min-h-0 flex flex-col p-2 md:p-3 overflow-y-auto min-[1100px]:overflow-hidden">
+      {/* Stage Toolbar: At most 2 tight rows (Requirement 2a) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 mb-2 shadow-xs shrink-0">
         {/* Algorithm Segmented Selector */}
-        <div className="flex items-center gap-1 p-1 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
+        <div className="flex items-center gap-1 p-0.5 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
           <button
             onClick={() => onAlgorithmChange('linear_search')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-3 py-1 rounded-md transition-all ${
               algorithmId === 'linear_search'
                 ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                 : 'text-slate-400 hover:text-slate-200'
@@ -108,7 +108,7 @@ export const SearchingStage: React.FC<SearchingStageProps> = ({
           </button>
           <button
             onClick={() => onAlgorithmChange('binary_search')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-3 py-1 rounded-md transition-all ${
               algorithmId === 'binary_search'
                 ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                 : 'text-slate-400 hover:text-slate-200'
@@ -128,13 +128,13 @@ export const SearchingStage: React.FC<SearchingStageProps> = ({
               value={target}
               onChange={e => handleTargetChange(parseInt(e.target.value, 10) || 0)}
               aria-label="Target search value"
-              className="w-16 px-2 py-1 text-xs font-mono bg-slate-950 border border-slate-700 rounded-md text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-16 px-2 py-0.5 text-xs font-mono bg-slate-950 border border-slate-700 rounded-md text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </label>
 
           <button
             onClick={handleRandomize}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors"
           >
             <Shuffle className="w-3.5 h-3.5 text-indigo-400" />
             <span>Randomize</span>
@@ -143,9 +143,9 @@ export const SearchingStage: React.FC<SearchingStageProps> = ({
       </div>
 
       {/* Reserved slot for Unsorted warning so the layout does NOT jump */}
-      <div className="min-h-[50px] mb-4 flex items-center shrink-0">
+      <div className="min-h-[42px] mb-2 flex items-center shrink-0">
         {isSortedWarning && (
-          <div className="w-full flex items-center justify-between p-3 rounded-xl bg-amber-950/50 border border-amber-800 text-amber-300 text-xs shadow-xs animate-in fade-in">
+          <div className="w-full flex items-center justify-between p-2 rounded-xl bg-amber-950/50 border border-amber-800 text-amber-300 text-xs shadow-xs animate-in fade-in">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
@@ -154,7 +154,7 @@ export const SearchingStage: React.FC<SearchingStageProps> = ({
             </div>
             <button
               onClick={handleSortFirst}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-colors shadow-xs"
             >
               <ArrowUpDown className="w-3.5 h-3.5" />
               <span>Sort Array First</span>
@@ -163,8 +163,34 @@ export const SearchingStage: React.FC<SearchingStageProps> = ({
         )}
       </div>
 
-      {/* Array Visualization Arena: Top-anchored, zero wasted space */}
-      <div className="min-h-[280px] flex flex-col justify-start pt-3 pb-4 px-6 rounded-2xl bg-slate-950/70 border border-slate-800/80 relative overflow-hidden">
+      {/* Array Visualization Arena: Flex-1 takes remaining flexible height (Requirement 2b) */}
+      <div className="flex-1 min-h-0 flex flex-col justify-start p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 relative overflow-hidden">
+        {/* Visual Legend Header (Requirement 39) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] mb-2 shrink-0 z-10 relative">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-slate-700" />
+              <span className="text-slate-400">Default</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-amber-500" />
+              <span className="text-slate-400">Comparing</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-indigo-500" />
+              <span className="text-slate-400">Mid Point</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500" />
+              <span className="text-slate-400">Target Found</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-slate-900 border border-slate-700 opacity-50" />
+              <span className="text-slate-400">Eliminated</span>
+            </span>
+          </div>
+        </div>
+
         {/* Subtle background grid */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 

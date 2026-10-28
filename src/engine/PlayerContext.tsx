@@ -8,7 +8,8 @@ interface PlayerContextType {
   currentStep: Step | null;
   isPlaying: boolean;
   playbackSpeed: number;
-  mode: 'beginner' | 'advanced';
+  autoPauseAtKeyMoments: boolean;
+  toggleAutoPause: () => void;
   theme: 'dark' | 'light';
   play: () => void;
   pause: () => void;
@@ -18,7 +19,6 @@ interface PlayerContextType {
   goToStep: (index: number) => void;
   reset: () => void;
   setSpeed: (speed: number) => void;
-  setMode: (mode: 'beginner' | 'advanced') => void;
   toggleTheme: () => void;
   loadSteps: (newSteps: Step[], autoPlay?: boolean) => void;
   clearConfetti: () => void;
@@ -28,12 +28,19 @@ interface PlayerContextType {
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
 
+const isKeyMoment = (type?: string): boolean => {
+  if (!type) return false;
+  return ['swap', 'partition', 'found', 'probe', 'rotate', 'relax', 'rehash', 'heapify'].includes(type);
+};
+
 export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [steps, setSteps] = useState<Step[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
-  const [mode, setMode] = useState<'beginner' | 'advanced'>('beginner');
+  // Rule 33: Default speed is 0.5x. Speed options: 0.25x, 0.5x, 1x, 2x
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(0.5);
+  // Rule 37: Auto-pause at key moments toggle, ON by default
+  const [autoPauseAtKeyMoments, setAutoPauseAtKeyMoments] = useState<boolean>(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -50,6 +57,10 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  }, []);
+
+  const toggleAutoPause = useCallback(() => {
+    setAutoPauseAtKeyMoments(prev => !prev);
   }, []);
 
   const totalSteps = steps.length;
@@ -153,8 +164,11 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return;
     }
 
-    const baseDelayMs = 700; // standard 1x step duration
-    const delay = Math.max(80, baseDelayMs / playbackSpeed);
+    // Rule 33: At 1x each step lasts about 2 seconds (2000ms)
+    const baseDelayMs = 2000;
+    // Rule 37: Auto-pause pauses for about 1 second (1000ms) on swaps, pivot, found, collisions
+    const extraPauseMs = autoPauseAtKeyMoments && isKeyMoment(steps[currentStepIndex]?.type) ? 1000 : 0;
+    const delay = Math.max(120, (baseDelayMs / playbackSpeed) + extraPauseMs);
 
     timerRef.current = setTimeout(() => {
       nextStep();
@@ -163,12 +177,11 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [isPlaying, currentStepIndex, steps.length, playbackSpeed, nextStep]);
+  }, [isPlaying, currentStepIndex, steps, playbackSpeed, autoPauseAtKeyMoments, nextStep]);
 
   // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input or textarea
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         return;
@@ -201,7 +214,8 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         currentStep,
         isPlaying,
         playbackSpeed,
-        mode,
+        autoPauseAtKeyMoments,
+        toggleAutoPause,
         theme,
         play,
         pause,
@@ -211,7 +225,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         goToStep,
         reset,
         setSpeed,
-        setMode,
         toggleTheme,
         loadSteps,
         clearConfetti,

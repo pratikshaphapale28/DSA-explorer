@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { PlayerProvider, usePlayer } from './engine/PlayerContext';
 import { TopBar } from './components/layout/TopBar';
-import { PlaybackBar } from './components/layout/PlaybackBar';
+import { StepCaptionCard } from './components/common/StepCaptionCard';
+import { ModulePlaybackControls } from './components/common/ModulePlaybackControls';
 import { InsightPanel } from './components/insight/InsightPanel';
 import { HelpModal } from './components/common/HelpModal';
 import { GuidedTourModal } from './components/common/GuidedTourModal';
@@ -64,17 +65,19 @@ export function DSAExplorerInner() {
     activeModule !== 'landing' && activeModule !== 'cheatsheet';
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/30 transition-colors duration-200">
+    <div className="h-screen max-h-screen overflow-hidden flex flex-col bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/30 transition-colors duration-200">
       {/* 1. Header Bar */}
-      <TopBar
-        activeModule={activeModule}
-        onSelectModule={handleSelectModule}
-        onOpenHelp={() => setIsHelpOpen(true)}
-      />
+      <div className="shrink-0">
+        <TopBar
+          activeModule={activeModule}
+          onSelectModule={handleSelectModule}
+          onOpenHelp={() => setIsHelpOpen(true)}
+        />
+      </div>
 
       {/* Sub-header helper actions bar when inside a module */}
       {isStageModule && (
-        <div className="flex items-center justify-between px-4 md:px-6 py-2 bg-slate-200/80 dark:bg-slate-900/50 border-b border-slate-300 dark:border-slate-800 text-xs">
+        <div className="shrink-0 flex items-center justify-between px-4 md:px-6 py-2 bg-slate-200/80 dark:bg-slate-900/50 border-b border-slate-300 dark:border-slate-800 text-xs">
           <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
             <span className="font-semibold text-slate-800 dark:text-slate-300 capitalize">{activeModule}</span>
             <span>·</span>
@@ -100,56 +103,74 @@ export function DSAExplorerInner() {
         </div>
       )}
 
-      {/* 2. Main Visual Workspace */}
-      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-        {/* Center Stage / Page */}
-        <div className="flex-1 flex flex-col min-h-0 bg-slate-50 dark:bg-slate-950 overflow-y-auto">
-          {activeModule === 'landing' && (
-            <LandingPage
-              onSelectModule={handleSelectModule}
-              onStartDemo={handleStartDemo}
-            />
-          )}
+      {/* 2. Main Visual Workspace (Requirement 1 & 2: Two-column one-screen layout) */}
+      <main className="flex-1 flex flex-col min-[1100px]:flex-row overflow-y-auto min-[1100px]:overflow-hidden min-h-0">
+        {!isStageModule ? (
+          /* Full-width scrollable container for Landing and CheatSheet pages */
+          <div className="flex-1 min-h-0 bg-slate-50 dark:bg-slate-950 overflow-y-auto">
+            {activeModule === 'landing' && (
+              <LandingPage
+                onSelectModule={handleSelectModule}
+                onStartDemo={handleStartDemo}
+              />
+            )}
+            {activeModule === 'cheatsheet' && <CheatSheetPage />}
+          </div>
+        ) : (
+          <>
+            {/* LEFT column (about 60%): Canvas on top, directly under it Playback controls, then StepCaptionCard */}
+            <div className="w-full min-[1100px]:w-[60%] min-[1100px]:h-full flex flex-col min-h-0 p-2 md:p-2.5 gap-2 bg-slate-50 dark:bg-slate-950 overflow-y-auto min-[1100px]:overflow-hidden">
+              {/* Visual canvas stage */}
+              <div className="flex-1 min-h-0 flex flex-col overflow-y-auto min-[1100px]:overflow-hidden">
+                {activeModule === 'searching' && (
+                  <SearchingStage
+                    algorithmId={searchAlgoId}
+                    onAlgorithmChange={handleSearchAlgoChange}
+                  />
+                )}
 
-          {activeModule === 'cheatsheet' && <CheatSheetPage />}
+                {activeModule === 'sorting' && (
+                  <SortingStage
+                    activeAlgorithm={currentAlgo}
+                    onSelectAlgorithm={algo => setCurrentAlgo(algo)}
+                  />
+                )}
 
-          {activeModule === 'searching' && (
-            <SearchingStage
-              algorithmId={searchAlgoId}
-              onAlgorithmChange={handleSearchAlgoChange}
-            />
-          )}
+                {activeModule === 'stackQueue' && (
+                  <StackQueueStage onAlgorithmChange={algo => setCurrentAlgo(algo)} />
+                )}
 
-          {activeModule === 'sorting' && (
-            <SortingStage
-              activeAlgorithm={currentAlgo}
-              onSelectAlgorithm={algo => setCurrentAlgo(algo)}
-            />
-          )}
+                {activeModule === 'trees' && (
+                  <TreeStage onAlgorithmChange={algo => setCurrentAlgo(algo)} />
+                )}
 
-          {activeModule === 'stackQueue' && (
-            <StackQueueStage onAlgorithmChange={algo => setCurrentAlgo(algo)} />
-          )}
+                {activeModule === 'graphs' && (
+                  <GraphStage onAlgorithmChange={algo => setCurrentAlgo(algo)} />
+                )}
 
-          {activeModule === 'trees' && (
-            <TreeStage onAlgorithmChange={algo => setCurrentAlgo(algo)} />
-          )}
+                {activeModule === 'hashing' && (
+                  <HashingStage onAlgorithmChange={algo => setCurrentAlgo(algo)} />
+                )}
+              </div>
 
-          {activeModule === 'graphs' && (
-            <GraphStage onAlgorithmChange={algo => setCurrentAlgo(algo)} />
-          )}
+              {/* c. PLAYBACK BAR: directly under canvas, always visible (Requirement 2c & 7) */}
+              <div className="shrink-0 min-[1100px]:static sticky bottom-0 z-30 shadow-md min-[1100px]:shadow-none">
+                <ModulePlaybackControls />
+              </div>
 
-          {activeModule === 'hashing' && (
-            <HashingStage onAlgorithmChange={algo => setCurrentAlgo(algo)} />
-          )}
-        </div>
+              {/* d. Step Caption Card: directly under playback bar, fixed ~110px height (Requirement 2d) */}
+              <div className="shrink-0">
+                <StepCaptionCard algorithm={currentAlgo} />
+              </div>
+            </div>
 
-        {/* Right Insight Panel (only visible when in an interactive module) */}
-        {isStageModule && <InsightPanel algorithm={currentAlgo} />}
+            {/* RIGHT column (about 40%): Pseudocode panel and collapsible Telemetry */}
+            <div className="w-full min-[1100px]:w-[40%] min-[1100px]:h-full flex flex-col min-h-0 border-t min-[1100px]:border-t-0 min-[1100px]:border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto min-[1100px]:overflow-hidden">
+              <InsightPanel algorithm={currentAlgo} />
+            </div>
+          </>
+        )}
       </main>
-
-      {/* 3. Bottom Playback Controls (only in interactive modules) */}
-      {isStageModule && <PlaybackBar />}
 
       {/* 4. Global Modals */}
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />

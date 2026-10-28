@@ -14,7 +14,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onSelectModule,
   onOpenHelp,
 }) => {
-  const { theme, toggleTheme, mode, setMode } = usePlayer();
+  const { theme, toggleTheme } = usePlayer();
 
   const navLinks: { id: ModuleCategory | 'landing' | 'cheatsheet'; label: string }[] = [
     { id: 'landing', label: 'Overview' },
@@ -85,32 +85,6 @@ export const TopBar: React.FC<TopBarProps> = ({
 
       {/* Zone 3: Controls & Primary Actions */}
       <div className="flex items-center gap-2 shrink-0">
-        {/* Beginner vs Advanced Mode Toggle */}
-        <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-700/60 text-[11px] font-medium">
-          <button
-            onClick={() => setMode('beginner')}
-            className={`px-2 py-1 rounded-md transition-all ${
-              mode === 'beginner'
-                ? 'bg-indigo-600 text-white shadow-xs font-bold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-            }`}
-            title="Beginner mode: detailed step narration and visual metaphors"
-          >
-            Beginner
-          </button>
-          <button
-            onClick={() => setMode('advanced')}
-            className={`px-2 py-1 rounded-md transition-all ${
-              mode === 'advanced'
-                ? 'bg-indigo-600 text-white shadow-xs font-bold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-            }`}
-            title="Advanced mode: compact code and metrics focus"
-          >
-            Advanced
-          </button>
-        </div>
-
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}

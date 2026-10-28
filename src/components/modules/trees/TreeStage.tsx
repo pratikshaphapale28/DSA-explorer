@@ -20,7 +20,7 @@ interface TreeStageProps {
 }
 
 export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
-  const { currentStep, loadSteps } = usePlayer();
+  const { currentStep, currentStepIndex, loadSteps } = usePlayer();
 
   const [treeType, setTreeType] = useState<'bst' | 'avl'>('avl');
   const [inputValue, setInputValue] = useState<string>('25');
@@ -339,14 +339,14 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
 
   return (
     <ErrorBoundary fallbackTitle="Tree Stage Error">
-      <div className="flex-1 flex flex-col p-4 md:p-6 overflow-y-auto">
-        {/* Top Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900 border border-slate-800 mb-4 shadow-sm shrink-0">
+      <div className="flex-1 min-h-0 flex flex-col p-2 md:p-3 overflow-y-auto min-[1100px]:overflow-hidden">
+        {/* Top Toolbar: At most 2 tight rows (Requirement 2a) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 mb-2 shadow-xs shrink-0">
           {/* Tree Type Switcher */}
-          <div className="flex items-center gap-1 p-1 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
+          <div className="flex items-center gap-1 p-0.5 bg-slate-950 rounded-lg border border-slate-800 text-xs font-medium">
             <button
               onClick={() => setTreeType('avl')}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-md transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
                 treeType === 'avl'
                   ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
@@ -357,7 +357,7 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
             </button>
             <button
               onClick={() => setTreeType('bst')}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-md transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
                 treeType === 'bst'
                   ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
@@ -369,18 +369,18 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
           </div>
 
           {/* Action Controls */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <input
               type="number"
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
-              className="w-16 px-2 py-1 text-xs font-mono bg-slate-950 border border-slate-700 rounded text-slate-100"
+              className="w-16 px-2 py-0.5 text-xs font-mono bg-slate-950 border border-slate-700 rounded text-slate-100"
               placeholder="Val"
             />
 
             <button
               onClick={handleInsert}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Insert</span>
@@ -388,7 +388,7 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
 
             <button
               onClick={handleDelete}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-semibold transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-semibold transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Delete</span>
@@ -396,7 +396,7 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
 
             <button
               onClick={handleSearch}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors"
             >
               <Search className="w-3.5 h-3.5" />
               <span>Search</span>
@@ -407,7 +407,7 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
               <select
                 value={traversalType}
                 onChange={e => setTraversalType(e.target.value as any)}
-                className="bg-transparent text-slate-200 text-xs px-2 py-1 border-none focus:outline-none"
+                className="bg-transparent text-slate-200 text-xs px-2 py-0.5 border-none focus:outline-none"
               >
                 <option value="inorder">Inorder (LNR)</option>
                 <option value="preorder">Preorder (NLR)</option>
@@ -416,7 +416,7 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
               </select>
               <button
                 onClick={handleTraverse}
-                className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded font-medium transition-colors"
+                className="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded font-medium transition-colors"
               >
                 Traverse
               </button>
@@ -424,7 +424,7 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
 
             <button
               onClick={handleResetSampleTree}
-              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 transition-colors"
+              className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 transition-colors"
               title="Reset Sample Tree"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -434,7 +434,7 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
 
         {/* Balance Factor Legend: SHOWN ONLY IN AVL MODE (Hidden in Standard BST Mode) */}
         {treeType === 'avl' && (
-          <div className="mb-4 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs text-slate-300 shadow-sm shrink-0 animate-in fade-in">
+          <div className="mb-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs text-slate-300 shadow-xs shrink-0 animate-in fade-in">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-indigo-400 shrink-0" />
               <span>
@@ -449,7 +449,7 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
 
         {/* Rotation alert notification banner */}
         {aux.rotationCase && (
-          <div className="mb-4 flex items-center justify-between p-3 rounded-xl bg-purple-950/60 border border-purple-800 text-purple-200 text-xs animate-in fade-in shrink-0">
+          <div className="mb-2 flex items-center justify-between p-2 rounded-xl bg-purple-950/60 border border-purple-800 text-purple-200 text-xs animate-in fade-in shrink-0">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
               <span>
@@ -461,7 +461,7 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
 
         {/* Traversal Output Sequence Ribbon */}
         {aux.traversalOutput && aux.traversalOutput.length > 0 && (
-          <div className="mb-4 p-3 rounded-xl bg-indigo-950/40 border border-indigo-900/60 flex items-center gap-3 overflow-x-auto text-xs shrink-0">
+          <div className="mb-2 p-2 rounded-xl bg-indigo-950/40 border border-indigo-900/60 flex items-center gap-2 overflow-x-auto text-xs shrink-0">
             <span className="font-semibold text-indigo-300 whitespace-nowrap">
               Traversal Output ({aux.action}):
             </span>
@@ -478,98 +478,176 @@ export const TreeStage: React.FC<TreeStageProps> = ({ onAlgorithmChange }) => {
           </div>
         )}
 
-        {/* SVG Tree Canvas Stage: Top-anchored, zero wasted top margin */}
-        <div className="min-h-[260px] flex items-center justify-center p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 relative overflow-auto">
-          <svg className="w-full h-full min-w-[650px] min-h-[240px]" viewBox="0 0 700 240">
-            {/* Edges */}
-            {nodesToRender
-              .filter((node): node is RenderNode & { parent: { x: number; y: number } } => Boolean(node.parent))
-              .map((node, i) => (
-                <line
-                  key={`edge-${node.id}-${i}`}
-                  x1={node.parent.x}
-                  y1={node.parent.y}
-                  x2={node.x}
-                  y2={node.y}
-                  stroke="#334155"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-              ))}
+        {/* SVG Tree Canvas Stage: Flex-1 takes all flexible height (Requirement 2b) */}
+        <div className="flex-1 min-h-0 flex flex-col justify-start p-2.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 relative overflow-auto">
+          {/* Visual Legend Header (Requirement 39) */}
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] mb-2 shrink-0 z-10">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-800 border border-indigo-500" />
+                <span className="text-slate-400">Node</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                <span className="text-slate-400">Active / Inspecting</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-500" />
+                <span className="text-slate-400">Search Path</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                <span className="text-slate-400">Unbalanced (|BF| &gt; 1)</span>
+              </span>
+            </div>
+          </div>
+          <svg className="w-full flex-1 min-w-[650px] min-h-[220px]" viewBox="0 0 700 240">
+            {/* LAYER 1: First all edges (lines), shortened to circle border */}
+            <g className="tree-edges">
+              {nodesToRender
+                .filter((node): node is RenderNode & { parent: { x: number; y: number } } => Boolean(node.parent))
+                .map((node, i) => {
+                  const dx = node.x - node.parent.x;
+                  const dy = node.y - node.parent.y;
+                  const dist = Math.hypot(dx, dy) || 1;
+                  const r = 20;
+                  const x1 = node.parent.x + (dx / dist) * r;
+                  const y1 = node.parent.y + (dy / dist) * r;
+                  const x2 = node.x - (dx / dist) * r;
+                  const y2 = node.y - (dy / dist) * r;
 
-            {/* Nodes */}
-            {nodesToRender.map((node, i) => {
-              const isHighlighted = highlightedNodeIds.includes(node.id);
-              const isUnbalanced = aux.unbalancedNodeId === node.id;
-              const inSearchPath = aux.searchPath?.includes(node.value);
+                  return (
+                    <line
+                      key={`edge-${node.id}-${i}`}
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke="#475569"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                  );
+                })}
+            </g>
 
-              let fill = '#1e293b';
-              let stroke = '#6366f1';
+            {/* LAYER 2: Node groups centered at translate(node.x, node.y) */}
+            <g className="tree-nodes">
+              {nodesToRender.map((node, i) => {
+                const isHighlighted = highlightedNodeIds.includes(node.id);
+                const isUnbalanced = aux.unbalancedNodeId === node.id;
+                const inSearchPath = aux.searchPath?.includes(node.value);
 
-              if (isUnbalanced) {
-                fill = '#e11d48';
-                stroke = '#fb7185';
-              } else if (isHighlighted) {
-                fill = '#f59e0b';
-                stroke = '#fbbf24';
-              } else if (inSearchPath) {
-                fill = '#0284c7';
-                stroke = '#38bdf8';
-              }
+                let fill = '#1e293b';
+                let stroke = '#6366f1';
 
-              return (
-                <g key={`node-${node.id}-${i}`} className="transition-all duration-300">
-                  <circle
-                    cx={node.x}
-                    cy={node.y}
-                    r="20"
-                    fill={fill}
-                    stroke={stroke}
-                    strokeWidth="2.5"
-                    className="filter drop-shadow-md"
-                  />
-                  <text
-                    x={node.x}
-                    y={node.y + 4}
-                    textAnchor="middle"
-                    fill="#ffffff"
-                    fontSize="12"
-                    fontFamily="monospace"
-                    fontWeight="bold"
+                if (isUnbalanced) {
+                  fill = '#e11d48';
+                  stroke = '#fb7185';
+                } else if (isHighlighted) {
+                  fill = '#f59e0b';
+                  stroke = '#fbbf24';
+                } else if (inSearchPath) {
+                  fill = '#0284c7';
+                  stroke = '#38bdf8';
+                }
+
+                return (
+                  <g
+                    key={`tree-node-${node.id}-${i}`}
+                    transform={`translate(${node.x}, ${node.y})`}
+                    className="cursor-default"
                   >
-                    {node.value}
-                  </text>
+                    {/* Ring Fix: Centered at cx=0, cy=0 inside node group */}
+                    {isHighlighted && (
+                      <>
+                        {/* Static thin ring */}
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="26"
+                          fill="none"
+                          stroke="#f59e0b"
+                          strokeWidth="2"
+                          opacity="0.85"
+                        />
+                        {/* Calm pulse ring: scales 1.0 to 1.25 and fades out over 600ms */}
+                        <circle
+                          key={`tree-pulse-${node.id}-${currentStepIndex}`}
+                          cx="0"
+                          cy="0"
+                          r="24"
+                          fill="none"
+                          stroke="#f59e0b"
+                          strokeWidth="2.5"
+                          className="node-pulse-ring"
+                        />
+                      </>
+                    )}
 
-                  {/* Balance Factor badge: ONLY visible in AVL mode, completely hidden in Standard BST mode */}
-                  {treeType === 'avl' && (
-                    <g transform={`translate(${node.x + 12}, ${node.y - 18})`} className="cursor-help">
-                      <title>{`Badge = balance factor = left height - right height; red when outside -1..1 (current: ${node.balanceFactor})`}</title>
-                      <rect
-                        x="0"
-                        y="0"
-                        width="18"
-                        height="14"
-                        rx="4"
-                        fill={Math.abs(node.balanceFactor) > 1 ? '#e11d48' : '#0f172a'}
-                        stroke={Math.abs(node.balanceFactor) > 1 ? '#f43f5e' : '#475569'}
-                        strokeWidth="1"
-                      />
-                      <text
-                        x="9"
-                        y="10"
-                        textAnchor="middle"
-                        fill={Math.abs(node.balanceFactor) > 1 ? '#ffffff' : '#94a3b8'}
-                        fontSize="9"
-                        fontFamily="monospace"
-                        fontWeight="bold"
+                    {/* Node circle with solid fill */}
+                    <circle
+                      cx="0"
+                      cy="0"
+                      r="20"
+                      fill={fill}
+                      stroke={stroke}
+                      strokeWidth="2.5"
+                      className="filter drop-shadow-md transition-colors duration-200"
+                    />
+
+                    {/* Node label */}
+                    <text
+                      x="0"
+                      y="0"
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fill="#ffffff"
+                      fontSize="12"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                      className="select-none"
+                      pointerEvents="none"
+                    >
+                      {node.value}
+                    </text>
+
+                    {/* AVL Balance Factor badge */}
+                    {treeType === 'avl' && (
+                      <g
+                        transform="translate(12, -18)"
+                        className="cursor-help"
                       >
-                        {node.balanceFactor > 0 ? `+${node.balanceFactor}` : node.balanceFactor}
-                      </text>
-                    </g>
-                  )}
-                </g>
-              );
-            })}
+                        <title>{`Badge = balance factor = left height - right height; red when outside -1..1 (current: ${node.balanceFactor})`}</title>
+                        <rect
+                          x="0"
+                          y="0"
+                          width="18"
+                          height="14"
+                          rx="4"
+                          fill={Math.abs(node.balanceFactor) > 1 ? '#e11d48' : '#0f172a'}
+                          stroke={Math.abs(node.balanceFactor) > 1 ? '#f43f5e' : '#475569'}
+                          strokeWidth="1"
+                        />
+                        <text
+                          x="9"
+                          y="7"
+                          textAnchor="middle"
+                          dominantBaseline="central"
+                          fill={Math.abs(node.balanceFactor) > 1 ? '#ffffff' : '#94a3b8'}
+                          fontSize="9"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                          pointerEvents="none"
+                        >
+                          {node.balanceFactor > 0 ? `+${node.balanceFactor}` : node.balanceFactor}
+                        </text>
+                      </g>
+                    )}
+                  </g>
+                );
+              })}
+            </g>
           </svg>
         </div>
       </div>
